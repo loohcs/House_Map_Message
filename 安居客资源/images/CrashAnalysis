@@ -1,0 +1,9 @@
+1. 地图中 遍历mapview.annotations 会出现Collection <__NSArrayM: 0x13b3fce0> was mutated while being enumerated.
+原因： 在遍历mapview.annotations的循环中有removeAnnotation的操作， 会导致正在遍历的map.annotations出现修改， 从而导致下次迭代时crash
+方案： copy一份mapView.annotations, 遍历copy的那份， 从map.annotations中直接移除。
+
+2. 列表中 resetDataSource 会导致在didSelected后crash。
+原因： resetDataSource会重置tableView的dataSource。
+方案： resetDataSource只能在获取列表成功后， 如果是第一页的请求才重置。 并且在任何需要通过dataSource取数据的地方先判断dataSource数组长度是否大于该index
+
+3. 

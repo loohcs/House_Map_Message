@@ -1,0 +1,96 @@
+Groups:
+AppDelegate: 程序入口, 包括appDelegate和一些viewController设置类
+Contrib:
+Manager:
+Category:
+Controllers: 所有的ViewControllers
+DataModel: 所有数据模型相关类， CoreData和自定义的对象。
+View: 所有自定义的视图类。
+
+DataModel:
+    DataCenter: 全局的数据中心， controller所需的数据模型来源于它， DataCenter转换Controller所需的数据模型。
+    AppDataLoader: DataCenter利用它来加载本地存放的plist数据， 比如城市，区域列表。
+    RTSearchConditionFactory: 全局的搜索条件生成器。
+    RTSearchCondition: 附近搜索，关键字搜索， 自定义搜索。 同时实现descrition给显示搜索条件用。
+    CoreDataObject: 由CoreData产生， 通常情况不需要修改。
+    MapAnnotation: 地图所需的Annotation对象。
+    CommunityObject: 由于楼盘信息的请求是分多步的， 第一步通过list请求来的是基础信息， 由coredata里的Community对象描述， 后面请求的是补充信息， 由于补充信息的定义可变性比较大，同时程序只保存基础信息， 所以没有加入到coredata的Community中， 而是定义了一些补充的对象。
+
+Controllers:
+    RTViewController: 定义了一些基类， 包括实现网络请求的cancel操作。
+    Community:
+        KeywordSearchController: 修改全局的keywordSearchCondition.
+        CustomSearchController: 修改全局的customSearchCondition.
+        CommunityListController: 楼盘列表页面，为缺省主页面， 可以navigate到CommunityMapController, showModal到searchController。
+        CommunityDetailController: 楼盘详细页面， 可以从listController, 团购页面导航过来。
+                            从列表页面过来会带入community的楼盘基础信息， 然后请求补充信息。
+                            从其他地方过来需要请求楼盘所有信息。
+                            楼盘单页的dataSource为 CommunityDetailDataSource。
+
+Views:
+    CommunityDetailCells: 包括楼盘单页所需的所有cell
+        CommunityDetailDataSource: 根据数据模型生成相应的cells。 有两个数据来源， 一个为CoreData的Community对象， 一个为补充请求的CommunityMore（房型和概述）
+                        
+
+//***********************************************************
+//***********************************************************
+//***********************************************************
+
+1. Filter:
+CommunityFilter: 小区搜索过滤器： 包括自定义搜索， 关键字搜索， 列表中的附近搜索， 地图中的附近搜索。
+FilterFactory: 全局的filter工厂， 由于filter通常只需要产生一次， 所以可以通过Factory来同一管理。
+
+具体的filter 与 api相对应， 每一个属性都对应着api中的一个参数。
+例如：CommunityFilter:  cityID, regionID, subRegionID(暂时没有用到）, priceID, order, lat, lng, distance, keywords, page, pageSize.
+这些属性可以分类为：
+0. common： cityID, page, pageSize;
+1. custom:  regionID, price, order;
+2. nearby: lat, lng, distance;
+3. keywords: keywords.
+
+程序的search逻辑通常都是对filter的属性进行设置：
+1. 自定义搜索： 第一次进入程序，通过选择器选择， 通过其他地方改变城市 都会执行自定义搜索。 自定义搜索必须设置0,1 中含有的属性。
+2. 附近搜索： 通过list中的nearby或者所有的地图search。 必须设置属性： 0, 2.
+3. 关键字搜索： 通过关键字search， 必须设置属性： 0, 3.
+其中cityID为全局属性， pageSize为固定属性， 所以都在factory里设置好了， 而当为附近搜索时： listNearby 自动设置lat， lng， distance ＝ 0.05。 mapNearby 自动设置lat， lng， page ＝ 1.
+
+2. RTLogger:
+RTLogger: 全局logger实例
+DeviceInfo: 提供设备信息，系统信息
+RTLoggerCacheDelegate： 作为批量发送的cache机制
+RTLoggerInfoDelegate： 获取当前的userLocation，cityID。
+
+
+
+3. RTCityManager: 从dataCenter里抽取所有和city相关的程序。
+职能：通过appDataLoader加载city, region, subregion, price列表， 作为程序的基础数据。 filter完全基于这些数据。 然后通过selector, nearby, pan map，nextpage, keywords等应用来对filter进行设置。
+
+主要属性：selectedCityID, locatedCityID. 以及各种和city相关的查询服务。
+提供所有city相关的信息。 filter的数据来源于cityManager。 selectorController 的dataSource为cityManager，
+当进行自定性搜索条件时， 需要把临时的filter 设置到cityManager里， selector的delegate方法会对filter进行设置。
+自定义搜索确认时需要把cityManager的filter置空。
+
+selectorController可以通用， 目前包括city, region, price的选择。
+通过设置delegate, datasource来实现与model的解藕。
+
+关联类: AppDataLoader, RTSelectorController, RTLogger.
+RTLogger的city， location信息从cityManager获得。
+
+
+4. RTLocationManager： 全局的LocationManager， 处理 location相关的工作。
+
+5. RTObjectMapper: 从DataCenter中剥离出来， 处理对象模型的映射： Community, TuanGou, CommunityAttribute。
+
+6. RTCoreDataManager： 从DataCenter中剥离出来， 处理所有CoreData相关工作， 包括： AppLog， favorite, history， favorite_tuangou
+
+
+7. 移除原有的SearchCondition, DataCenter, CityListController, SubListSearchController, RTUserLocationController, LoadController.
+
+
+
+
+
+
+
+
+

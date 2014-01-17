@@ -11,4 +11,67 @@
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
+
+
+#import "HomeViewController.h"
+#import "NewHouseViewController.h"
+#import "MyInfoViewController.h"
+#import "MessageViewController.h"
+#import "GroupPerchaseViewController.h"
+#import "MapViewController.h"
+
+#import "HousesInfo.h"
+
+#import "ASIHTTPRequest.h"
+#import "BMapKit.h"
+
+#import "NSString+URLWithArguments.h"
+
+#import "PremisesInfo.h"
+#import "PremisesDetailInfo.h"
+#import "PremisesDevelopment.h"
+#import "HouseType.h"
+#import "HousesInfo.h"
+
+#import "UIImageView+WebCache.h"
+#import "SDWebImageManager.h"
+#import "SDWebImageDownloader.h"
+
+
+#define SCREEN_WIDTH [UIScreen mainScreen].bounds.size.width
+#define SCREEN_HEIGHT [UIScreen mainScreen].bounds.size.height
+
+//登录接口，暂时不能用
+#define LOG_IN @"http://api.aifang.com/m/android/1.3/login/?api_key=androidkey&pass_word=123456&user_name=Vincent&sig=babfc1aa20c3b6eb51c4031480a63141&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.3&v=4.0.3&cid=-1&app=a-xinfang&pm=b95&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//注册接口，暂时不能使用
+#define REGISTER @"http://api.aifang.com/m/android/1.3/register/?api_key=androidkey&email=438419787@qq.com&pass_word=123456&user_name=Vincent&sig=c9d5f7c5eae17d458651bbfb2b87a4d9&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.3&v=4.0.3&cid=-1&app=a-xinfang&pm=b95&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//楼盘参数
+#define PREMISES_PARAMETERS @"http://api.aifang.com/m/android/1.3/loupan/DetailView/?api_key=androidkey&loupan_id=244843&sig=2bec96fc38e9261e437243d559025444&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=-1&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//楼盘详细信息
+#define PREMISES_DETAILE_INFO @"http://api.aifang.com/m/android/1.3/loupan/view/?api_key=androidkey&loupan_id=245255&sig=b4f54dcfd7300f4d9c26e1480b98ba04&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=14&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//团购接口
+#define GROUP_PURCHASE @"http://api.aifang.com/m/android/1.3/tuangou/list/TodayList/?api_key=androidkey&city_id=12&sig=bca07a40ed01acd1d1989d72a914e2eb&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=12&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//团购详情，暂时缺失
+#define GROUP_PURCHASE_DETAIL @"nil"
+
+//新房接口
+#define NEW_HOUSE @"http://api.aifang.com/m/android/1.3/props/searchList/?api_key=androidkey&city_id=12&order=rank&page=1&page_size=10&sig=aab3cae369360edadd93c87e84be46ee&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=14&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//新房详情
+#define NEW_HOUSE_DETAIL @"http://api.aifang.com/m/android/1.3/props/view/?api_key=androidkey&prop_id=5022108&sig=419b97d88ae0b90fb5b47afa31f00677&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=14&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//新的楼盘接口
+#define NEW_PREMISES @"http://api.aifang.com/m/android/1.3/loupan/list/?api_key=androidkey&city_id=12&order=rank&page=1&page_size=10&sig=aab3cae369360edadd93c87e84be46ee&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=-1&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//信息资讯
+#define MESSAGE @"http://api.aifang.com/m/android/1.3/inform/category/?api_key=androidkey&city_id=12&sig=bca07a40ed01acd1d1989d72a914e2eb&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=-1&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
+//资讯详情
+#define MESSAGE_DETAIL @"http://api.aifang.com/m/android/1.3/inform/content/?api_key=androidkey&cate_type=2&id=243635&sig=29e8300841a469e017355d35ffbfa075&i=a00000361d1846&m=Android-HUAWEI+C8812&o=C8812-user+4.0.3+GRJ90+C92B950+release-keys&cv=4.2&v=4.0.3&cid=14&app=a-xinfang&pm=b22&macid=f3cbcd5a6d8df823c6bd667499513de0"
+
 #endif
